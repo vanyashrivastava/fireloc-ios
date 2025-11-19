@@ -8,10 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Card } from 'react-native-paper';
-import BottomSheet, {
-  useBottomSheetAnimatedPosition,
-  useBottomSheetInternal,
-} from '@react-native-community/hooks';
+// Removed bottom sheet imports for Expo Go compatibility
 import AlertCard from './AlertCard';
 
 const COLORS = {

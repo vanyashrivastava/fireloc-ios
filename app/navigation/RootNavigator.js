@@ -1,7 +1,7 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
+import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { StyleSheet, Text } from 'react-native';
 
 import MapScreen from '../screens/MapScreen';
@@ -9,7 +9,7 @@ import AlertsScreen from '../screens/AlertsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import AboutScreen from '../screens/AboutScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const COLORS = {
@@ -63,118 +63,120 @@ const tabScreenOptions = ({ route }) => ({
   ...screenOptions,
 });
 
-const MapStackNavigator = () => {
-  return (
-    <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen
-        name="MapScreenStack"
-        component={MapScreen}
-        options={{
-          title: 'Map',
-          headerTitle: () => null,
-          headerStyle: {
-            backgroundColor: COLORS.white,
-            elevation: 0,
-            shadowOpacity: 0,
-          },
-        }}
-      />
-    </Stack.Navigator>
-  );
-};
 
-const AlertsStackNavigator = () => {
-  return (
-    <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen
-        name="AlertsScreenStack"
-        component={AlertsScreen}
-        options={{
-          title: 'Alerts',
-        }}
-      />
-    </Stack.Navigator>
-  );
-};
+const MapStack = createStackNavigator({
+  MapScreen: {
+    screen: MapScreen,
+    navigationOptions: {
+      title: 'Map',
+      headerStyle: {
+        backgroundColor: COLORS.white,
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+      headerTitleStyle: {
+        fontWeight: '700',
+        fontSize: 18,
+      },
+      headerTitleAlign: 'center',
+    },
+  },
+});
 
-const SettingsStackNavigator = () => {
-  return (
-    <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen
-        name="SettingsScreenStack"
-        component={SettingsScreen}
-        options={{
-          title: 'Settings',
-        }}
-      />
-    </Stack.Navigator>
-  );
-};
+const AlertsStack = createStackNavigator({
+  AlertsScreen: {
+    screen: AlertsScreen,
+    navigationOptions: {
+      title: 'Alerts',
+      ...screenOptions,
+    },
+  },
+});
 
-const AboutStackNavigator = () => {
-  return (
-    <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen
-        name="AboutScreenStack"
-        component={AboutScreen}
-        options={{
-          title: 'About',
-        }}
-      />
-    </Stack.Navigator>
-  );
-};
+const SettingsStack = createStackNavigator({
+  SettingsScreen: {
+    screen: SettingsScreen,
+    navigationOptions: {
+      title: 'Settings',
+      ...screenOptions,
+    },
+  },
+});
 
-export const RootNavigator = () => {
-  return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={tabScreenOptions}
-        initialRouteName="Map"
-      >
-        <Tab.Screen
-          name="Map"
-          component={MapStackNavigator}
-          options={{
-            tabBarLabel: 'Map',
-            tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size + 4, color }}>🗺️</Text>
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Alerts"
-          component={AlertsStackNavigator}
-          options={{
-            tabBarLabel: 'Alerts',
-            tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size + 4, color }}>🔔</Text>
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Settings"
-          component={SettingsStackNavigator}
-          options={{
-            tabBarLabel: 'Settings',
-            tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size + 4, color }}>⚙️</Text>
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="About"
-          component={AboutStackNavigator}
-          options={{
-            tabBarLabel: 'About',
-            tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size + 4, color }}>ℹ️</Text>
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
-  );
-};
+const AboutStack = createStackNavigator({
+  AboutScreen: {
+    screen: AboutScreen,
+    navigationOptions: {
+      title: 'About',
+      ...screenOptions,
+    },
+  },
+});
 
-export default RootNavigator;
+
+const TabNavigator = TabNavigator = Tab.Navigator ? null : createBottomTabNavigator({
+  Map: {
+    screen: MapStack,
+    navigationOptions: {
+      tabBarLabel: 'Map',
+      tabBarIcon: ({ tintColor }) => (
+        <Text style={{ fontSize: 24, color: tintColor }}>🗺️</Text>
+      ),
+    },
+  },
+  Alerts: {
+    screen: AlertsStack,
+    navigationOptions: {
+      tabBarLabel: 'Alerts',
+      tabBarIcon: ({ tintColor }) => (
+        <Text style={{ fontSize: 24, color: tintColor }}>🔔</Text>
+      ),
+    },
+  },
+  Settings: {
+    screen: SettingsStack,
+    navigationOptions: {
+      tabBarLabel: 'Settings',
+      tabBarIcon: ({ tintColor }) => (
+        <Text style={{ fontSize: 24, color: tintColor }}>⚙️</Text>
+      ),
+    },
+  },
+  About: {
+    screen: AboutStack,
+    navigationOptions: {
+      tabBarLabel: 'About',
+      tabBarIcon: ({ tintColor }) => (
+        <Text style={{ fontSize: 24, color: tintColor }}>ℹ️</Text>
+      ),
+    },
+  },
+}, {
+  initialRouteName: 'Map',
+  tabBarOptions: {
+    activeTintColor: COLORS.primary,
+    inactiveTintColor: COLORS.inactive,
+    style: {
+      backgroundColor: COLORS.white,
+      borderTopWidth: 1,
+      borderTopColor: '#EEEEEE',
+      elevation: 8,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      paddingBottom: 4,
+      paddingTop: 4,
+      height: 68,
+    },
+    labelStyle: {
+      fontSize: 11,
+      fontWeight: '600',
+      marginBottom: 4,
+    },
+  },
+});
+
+const AppContainer = createAppContainer(TabNavigator);
+
+export default AppContainer;

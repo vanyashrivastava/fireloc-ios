@@ -29,13 +29,6 @@
     "web": {
       "favicon": "./assets/logo.png"
     },
-    "plugins": [
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Allow FireLoc to access your location for fire detection alerts"
-        }
-      ]
-    ]
+    "plugins": []
   }
 }
