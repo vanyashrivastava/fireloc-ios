@@ -3,6 +3,7 @@ import { StatusBar, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import './app/services/firebaseConfig'; // Initialize Firebase
 import LandingScreen from './app/screens/LandingScreen';
 import MapScreen from './app/screens/MapScreen';
 import AlertsScreen from './app/screens/AlertsScreen';

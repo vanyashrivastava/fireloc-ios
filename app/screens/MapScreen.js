@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Modal, TextInput, Alert } from 'react-native';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../services/firebaseConfig';
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,66 +18,23 @@ export default function MapScreen() {
   const [photoUploaded, setPhotoUploaded] = useState(false);
 
   useEffect(() => {
-    // Simulated wildfire data
-    const mockFireData = [
-      {
-        id: 1,
-        name: 'Palisades Fire',
-        location: 'Pacific Palisades, CA',
-        severity: 'critical',
-        acres: 2847,
-        containment: 35,
-        status: 'Active',
-        evacuations: true,
-        time: '6:30 AM, TODAY',
-        top: 60,
-        left: 40,
-      },
-      {
-        id: 2,
-        name: 'Topanga Canyon Fire',
-        location: 'Topanga Canyon Blvd',
-        severity: 'high',
-        acres: 1250,
-        containment: 60,
-        status: 'Active',
-        evacuations: false,
-        time: '8:15 AM, TODAY',
-        top: 120,
-        left: 100,
-      },
-      {
-        id: 3,
-        name: 'Santa Monica Mountains',
-        location: 'Santa Monica Mountains',
-        severity: 'moderate',
-        acres: 580,
-        containment: 85,
-        status: 'Contained',
-        evacuations: false,
-        time: '9:00 AM, TODAY',
-        top: 180,
-        left: 140,
-      },
-      {
-        id: 4,
-        name: 'Griffith Park Fire',
-        location: 'Griffith Park Observatory',
-        severity: 'high',
-        acres: 945,
-        containment: 45,
-        status: 'Active',
-        evacuations: true,
-        time: '7:45 AM, TODAY',
-        top: 90,
-        left: 180,
-      },
-    ];
+    const fetchFireData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'FireData'));
+        const fireData = [];
+        querySnapshot.forEach((doc) => {
+          fireData.push({ id: doc.id, ...doc.data() });
+        });
+        setFires(fireData);
+      } catch (error) {
+        console.error('Error fetching fire data:', error);
+        Alert.alert('Error', 'Failed to load fire data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setTimeout(() => {
-      setFires(mockFireData);
-      setLoading(false);
-    }, 1000);
+    fetchFireData();
   }, []);
 
   const getSeverityColor = (severity) => {
