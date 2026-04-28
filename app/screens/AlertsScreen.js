@@ -1,102 +1,228 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  StatusBar,
+  Modal,
+  Alert,
+} from 'react-native';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../services/firebaseConfig';
+import * as Location from 'expo-location';
 
 export default function AlertsScreen() {
   const [filter, setFilter] = useState('all');
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState(null);
 
-  const alerts = [
-    {
-      id: 1,
-      time: '9:00 AM, TODAY',
-      name: 'Garment Shop',
-      address: '1234, 2nd St, North Avenue.',
-      type: 'fire',
-      severity: 'high',
-      icon: '🔥',
-      color: '#F97316',
-      coordinates: '34.0522°N, 118.2437°W',
-      distance: '0.8 miles',
-      description: 'This fire seems to be near you. Immediate evacuation recommended for residents within 1 mile radius.',
-    },
-    {
-      id: 2,
-      time: '9:20 AM, TODAY',
-      name: 'City Museum',
-      address: '1234, 2nd St, North Avenue.',
-      type: 'medical',
-      severity: 'critical',
-      icon: '🏥',
-      color: '#EF4444',
-      coordinates: '34.0489°N, 118.2501°W',
-      distance: '1.2 miles',
-      description: 'Medical emergency reported in the area. Emergency services are on site.',
-    },
-    {
-      id: 3,
-      time: '9:00 AM, TODAY',
-      name: 'Jwellery Store',
-      address: '1234, 2nd St, North Avenue.',
-      type: 'police',
-      severity: 'moderate',
-      icon: '🛡️',
-      color: '#EAB308',
-      coordinates: '34.0550°N, 118.2400°W',
-      distance: '2.1 miles',
-      description: 'Police activity reported. Avoid the area if possible.',
-    },
-    {
-      id: 4,
-      time: '9:20 AM, TODAY',
-      name: 'Houston Zoo',
-      address: '1234, 2nd St, North Avenue.',
-      type: 'accident',
-      severity: 'moderate',
-      icon: '🚗',
-      color: '#06B6D4',
-      coordinates: '34.0478°N, 118.2520°W',
-      distance: '3.5 miles',
-      description: 'Traffic accident causing delays. Seek alternate routes.',
-    },
-    {
-      id: 5,
-      time: '8:45 AM, TODAY',
-      name: 'Downtown Plaza',
-      address: '5678, Main St, Central District.',
-      type: 'fire',
-      severity: 'critical',
-      icon: '🔥',
-      color: '#F97316',
-      coordinates: '34.0420°N, 118.2470°W',
-      distance: '0.3 miles',
-      description: 'This fire seems to be near you. Evacuate immediately and follow official guidance.',
-    },
-    {
-      id: 6,
-      time: '8:30 AM, TODAY',
-      name: 'Riverside Park',
-      address: '9012, Park Ave, East Side.',
-      type: 'medical',
-      severity: 'moderate',
-      icon: '🏥',
-      color: '#EF4444',
-      coordinates: '34.0600°N, 118.2350°W',
-      distance: '4.2 miles',
-      description: 'Medical emergency in progress. Emergency services responding.',
-    },
-  ];
+  // Convert degrees to radians for haversine distance math
+  const toRad = (deg) => (deg * Math.PI) / 180;
 
-  const filteredAlerts = alerts.filter(alert => {
+  // Compute distance between two latitude/longitude pairs in kilometers
+  const distanceKm = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Check whether a JS Date object is today on the user's device
+  const isToday = (date) => {
+    if (!date) return false;
+
+    const now = new Date();
+
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate()
+    );
+  };
+
+  useEffect(() => {
+    const fetchEverything = async () => {
+      try {
+        // Ask for current device location permission
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        let currentUserLocation = null;
+
+        if (status === 'granted') {
+          const current = await Location.getCurrentPositionAsync({});
+          currentUserLocation = {
+            latitude: current.coords.latitude,
+            longitude: current.coords.longitude,
+          };
+          setUserLocation(currentUserLocation);
+        } else {
+          console.warn('Location permission not granted');
+        }
+
+        // Fetch FireAlerts from Firestore
+        const querySnapshot = await getDocs(collection(db, 'FireAlerts'));
+
+        const rawAlerts = [];
+        querySnapshot.forEach((docSnap) => {
+          rawAlerts.push({
+            id: docSnap.id,
+            ...docSnap.data(),
+          });
+        });
+
+        const alertsData = [];
+
+        // Loop through each FireAlert document
+        for (const alertItem of rawAlerts) {
+          const geo = alertItem.location;
+
+          // Reverse-geocode the GeoPoint into a real-world address
+          let name = 'Detected fire';
+          let address = 'Location unavailable';
+
+          if (geo) {
+            try {
+              const results = await Location.reverseGeocodeAsync({
+                latitude: geo.latitude,
+                longitude: geo.longitude,
+              });
+
+              const place = results[0];
+
+              if (place) {
+                // "name" should only use the first/main field
+                // Prefer street name, then name, then city, then region
+                name =
+                  place.street ||
+                  place.name ||
+                  place.city ||
+                  place.region ||
+                  'Detected fire';
+
+                // "address" can be the fuller, spelled-out line
+                const addressParts = [
+                  place.name,
+                  place.street,
+                  place.city,
+                  place.region,
+                  place.postalCode,
+                  place.country,
+                ].filter(Boolean);
+
+                if (addressParts.length > 0) {
+                  address = addressParts.join(', ');
+                }
+              }
+            } catch (geoError) {
+              console.warn('Reverse geocoding failed:', geoError);
+            }
+          }
+
+          // Derive severity from confidence
+          const confidence =
+            typeof alertItem.confidence === 'number'
+              ? alertItem.confidence
+              : 0;
+
+          const severity =
+            confidence >= 0.9
+              ? 'critical'
+              : confidence >= 0.7
+              ? 'high'
+              : 'moderate';
+
+          // Convert Firestore timestamp to JS Date
+          const alertDate =
+            alertItem.timestamp && alertItem.timestamp.toDate
+              ? alertItem.timestamp.toDate()
+              : null;
+
+          // User-friendly time string for display
+          const timeString = alertDate
+            ? alertDate.toLocaleString()
+            : 'Unknown time';
+
+          // Coordinates string for modal detail
+          const coordinates = geo
+            ? `${geo.latitude.toFixed(4)}° N, ${Math.abs(
+                geo.longitude
+              ).toFixed(4)}° ${geo.longitude < 0 ? 'W' : 'E'}`
+            : 'Coordinates unavailable';
+
+          // Compute distance from current phone location
+          let distanceString = 'Distance unavailable';
+          if (currentUserLocation && geo) {
+            const km = distanceKm(
+              currentUserLocation.latitude,
+              currentUserLocation.longitude,
+              geo.latitude,
+              geo.longitude
+            );
+            const miles = km * 0.621371;
+            distanceString = `${miles.toFixed(1)} miles away`;
+          }
+
+          alertsData.push({
+            id: alertItem.id,
+            time: timeString,
+            timestampDate: alertDate, // keep actual Date for filtering
+            name,
+            address,
+            type: 'fire',
+            severity,
+            description: `Status: ${
+              alertItem.status || 'unknown'
+            }\nConfidence: ${confidence}\nElevation: ${
+              alertItem.elevation ?? 'n/a'
+            }`,
+            coordinates,
+            distance: distanceString,
+            icon: '🔥',
+            color:
+              severity === 'critical'
+                ? '#EF4444'
+                : severity === 'high'
+                ? '#F97316'
+                : '#EAB308',
+          });
+        }
+
+        setAlerts(alertsData);
+      } catch (error) {
+        console.error('Error loading alerts:', error);
+        Alert.alert('Error', 'Failed to load alerts or location data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEverything();
+  }, []);
+
+  // Filter using real severity + real timestamp
+  const filteredAlerts = alerts.filter((alertItem) => {
     if (filter === 'all') return true;
-    if (filter === 'critical') return alert.severity === 'critical';
-    if (filter === 'today') return alert.time.includes('TODAY');
+    if (filter === 'critical') return alertItem.severity === 'critical';
+    if (filter === 'today') return isToday(alertItem.timestampDate);
     return true;
   });
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
       {/* Title */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Incidents</Text>
@@ -109,14 +235,16 @@ export default function AlertsScreen() {
             key={filterType}
             style={[
               styles.filterButton,
-              filter === filterType && styles.filterButtonActive
+              filter === filterType && styles.filterButtonActive,
             ]}
             onPress={() => setFilter(filterType)}
           >
-            <Text style={[
-              styles.filterButtonText,
-              filter === filterType && styles.filterButtonTextActive
-            ]}>
+            <Text
+              style={[
+                styles.filterButtonText,
+                filter === filterType && styles.filterButtonTextActive,
+              ]}
+            >
               {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
             </Text>
           </TouchableOpacity>
@@ -124,48 +252,65 @@ export default function AlertsScreen() {
       </View>
 
       {/* Alerts List */}
-      <ScrollView 
+      <ScrollView
         style={styles.alertsList}
         showsVerticalScrollIndicator={false}
       >
-        {filteredAlerts.map((alert) => (
-          <TouchableOpacity 
-            key={alert.id} 
-            style={styles.alertCard}
-            onPress={() => setSelectedAlert(alert)}
-          >
-            <View style={styles.alertContent}>
-              <View style={styles.alertInfo}>
-                <Text style={styles.alertTime}>{alert.time}</Text>
-                <Text style={styles.alertName}>{alert.name}</Text>
-                <Text style={styles.alertAddress}>{alert.address}</Text>
-              </View>
-              
-              <View style={[styles.alertIconContainer, { backgroundColor: alert.color }]}>
-                <Text style={styles.alertIcon}>{alert.icon}</Text>
-              </View>
-            </View>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading alerts...</Text>
+          </View>
+        ) : filteredAlerts.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateTitle}>No incidents found</Text>
+            <Text style={styles.emptyStateText}>
+              There are no alerts matching the current filter.
+            </Text>
+          </View>
+        ) : (
+          filteredAlerts.map((alertItem) => (
+            <TouchableOpacity
+              key={alertItem.id}
+              style={styles.alertCard}
+              onPress={() => setSelectedAlert(alertItem)}
+              activeOpacity={0.9}
+            >
+              <View style={styles.alertContent}>
+                <View style={styles.alertInfo}>
+                  <Text style={styles.alertTime}>{alertItem.time}</Text>
+                  <Text style={styles.alertName}>{alertItem.name}</Text>
+                  <Text style={styles.alertAddress}>{alertItem.address}</Text>
+                </View>
 
-            <TouchableOpacity style={styles.menuDots}>
-              <Text style={styles.menuDotsText}>⋯</Text>
+                <View
+                  style={[
+                    styles.alertIconContainer,
+                    { backgroundColor: `${alertItem.color}20` },
+                  ]}
+                >
+                  <Text style={styles.alertIcon}>{alertItem.icon}</Text>
+                </View>
+              </View>
+
+              <View style={styles.menuDots}>
+                <Text style={styles.menuDotsText}>···</Text>
+              </View>
             </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
+          ))
+        )}
       </ScrollView>
 
       {/* Detail Modal */}
       <Modal
-        visible={selectedAlert !== null}
+        visible={!!selectedAlert}
         animationType="slide"
-        presentationStyle="pageSheet"
         onRequestClose={() => setSelectedAlert(null)}
       >
-        {selectedAlert && (
-          <View style={styles.modalContainer}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {/* Modal Header */}
+        <View style={styles.modalContainer}>
+          {selectedAlert && (
+            <>
               <View style={styles.modalHeader}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.closeButton}
                   onPress={() => setSelectedAlert(null)}
                 >
@@ -173,50 +318,62 @@ export default function AlertsScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Image Placeholder */}
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.imagePlaceholderIcon}>{selectedAlert.icon}</Text>
-                <Text style={styles.imagePlaceholderText}>Image Placeholder</Text>
-              </View>
-
-              {/* Content */}
-              <View style={styles.modalContent}>
-                <View style={styles.modalTitleSection}>
-                  <Text style={styles.modalTitle}>{selectedAlert.name}</Text>
-                  <Text style={styles.modalAddress}>{selectedAlert.address}</Text>
-                  <Text style={styles.modalTime}>{selectedAlert.time}</Text>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.imagePlaceholder}>
+                  <Text style={styles.imagePlaceholderIcon}>
+                    {selectedAlert.icon}
+                  </Text>
+                  <Text style={styles.imagePlaceholderText}>
+                    Image Placeholder
+                  </Text>
                 </View>
 
-                {/* Distance Badge */}
-                <View style={styles.distanceBadge}>
-                  <Text style={styles.distanceText}>📍 {selectedAlert.distance} away</Text>
-                </View>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalTitleSection}>
+                    <Text style={styles.modalTitle}>{selectedAlert.name}</Text>
+                    <Text style={styles.modalAddress}>
+                      {selectedAlert.address}
+                    </Text>
+                    <Text style={styles.modalTime}>{selectedAlert.time}</Text>
+                  </View>
 
-                {/* Coordinates */}
-                <View style={styles.infoSection}>
-                  <Text style={styles.infoLabel}>Coordinates</Text>
-                  <Text style={styles.infoValue}>{selectedAlert.coordinates}</Text>
-                </View>
+                  <View style={styles.distanceBadge}>
+                    <Text style={styles.distanceText}>
+                      📍 {selectedAlert.distance}
+                    </Text>
+                  </View>
 
-                {/* Description */}
-                <View style={styles.descriptionSection}>
-                  <Text style={styles.descriptionText}>{selectedAlert.description}</Text>
-                </View>
+                  <View style={styles.infoSection}>
+                    <Text style={styles.infoLabel}>Coordinates</Text>
+                    <Text style={styles.infoValue}>
+                      {selectedAlert.coordinates}
+                    </Text>
+                  </View>
 
-                {/* Action Buttons */}
-                <View style={styles.actionButtons}>
-                  <TouchableOpacity style={styles.primaryButton}>
-                    <Text style={styles.primaryButtonText}>Explore Evacuation Routes</Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity style={styles.secondaryButton}>
-                    <Text style={styles.secondaryButtonText}>Resources & Help</Text>
-                  </TouchableOpacity>
+                  <View style={styles.descriptionSection}>
+                    <Text style={styles.descriptionText}>
+                      {selectedAlert.description}
+                    </Text>
+                  </View>
+
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity style={styles.primaryButton}>
+                      <Text style={styles.primaryButtonText}>
+                        Explore Evacuation Routes
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.secondaryButton}>
+                      <Text style={styles.secondaryButtonText}>
+                        Resources & Help
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            </ScrollView>
-          </View>
-        )}
+              </ScrollView>
+            </>
+          )}
+        </View>
       </Modal>
     </View>
   );
@@ -457,5 +614,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  loadingContainer: {
+    paddingVertical: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#9CA3AF',
+  },
+  emptyState: {
+    paddingVertical: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontWeight: '500',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
 });
-
