@@ -102,25 +102,26 @@ export default function AlertsScreen() {
               const place = results[0];
 
               if (place) {
-                // "name" should only use the first/main field
-                // Prefer street name, then name, then city, then region
-                name =
-                  place.street ||
-                  place.name ||
-                  place.city ||
-                  place.region ||
-                  'Detected fire';
-
-                // "address" can be the fuller, spelled-out line
+                // Title line: prefer street number + street name
+                const streetTitle =
+                  place.streetNumber && place.street
+                    ? `${place.streetNumber} ${place.street}`
+                    : place.street || place.name || place.city || place.region || 'Detected fire';
+              
+                name = streetTitle;
+              
+                // Subtitle / address line: fuller spelled-out address
                 const addressParts = [
                   place.name,
-                  place.street,
+                  place.streetNumber && place.street
+                    ? `${place.streetNumber} ${place.street}`
+                    : place.street,
                   place.city,
                   place.region,
                   place.postalCode,
                   place.country,
                 ].filter(Boolean);
-
+              
                 if (addressParts.length > 0) {
                   address = addressParts.join(', ');
                 }
