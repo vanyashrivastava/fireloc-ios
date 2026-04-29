@@ -1,3 +1,4 @@
+// dark-mode-system applied
 import React, { useState } from 'react';
 import { 
   View, 
@@ -7,6 +8,7 @@ import {
   TouchableOpacity, 
   Modal, 
   Alert,
+  StatusBar,
 } from 'react-native';
 // Note: We'll use a mocked Slider for pure React Native code consistency within the Modal
 import Slider from '@react-native-community/slider';
@@ -54,9 +56,9 @@ const ConfidenceThresholdModal = ({ isVisible, onClose, currentThreshold, setThr
             step={5}
             value={tempThreshold}
             onValueChange={setTempThreshold}
-            minimumTrackTintColor="#111827"
-            maximumTrackTintColor="#D1D5DB"
-            thumbTintColor="#111827"
+            minimumTrackTintColor="#FFFFFF"
+            maximumTrackTintColor="rgba(255,255,255,0.30)"
+            thumbTintColor="#FFFFFF"
           />
 
           <View style={modalStyles.minMaxText}>
@@ -112,6 +114,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0F0F0F" />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Title */}
         <View style={styles.titleContainer}>
@@ -211,7 +214,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0F0F0F',
   },
   titleContainer: {
     paddingHorizontal: 24,
@@ -222,13 +225,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 42,
     fontWeight: '300',
-    color: '#111827',
+    color: '#FFFFFF',
     letterSpacing: -0.5,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
     fontWeight: '400',
   },
   searchContainer: {
@@ -236,7 +239,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 24,
     marginBottom: 24,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#242424',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -247,28 +252,28 @@ const styles = StyleSheet.create({
   },
   searchText: {
     fontSize: 16,
-    color: '#9CA3AF',
+    color: 'rgba(255,255,255,0.55)',
     fontWeight: '400',
   },
   section: {
     marginHorizontal: 24,
     marginBottom: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1A1A1A',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: 'rgba(255,255,255,0.10)',
     overflow: 'hidden',
   },
   sectionHeader: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
-    backgroundColor: '#F9FAFB', 
+    backgroundColor: '#242424', 
   },
   item: {
     flexDirection: 'row',
@@ -276,9 +281,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1A1A1A',
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
   itemLeft: {
     flexDirection: 'row',
@@ -287,21 +292,21 @@ const styles = StyleSheet.create({
   itemIcon: {
     fontSize: 20,
     marginRight: 16,
-    color: '#111827',
+    color: '#FFFFFF',
   },
   itemText: {
     fontSize: 16,
-    color: '#111827',
+    color: '#FFFFFF',
     fontWeight: '400',
   },
   itemSubtext: {
     fontSize: 13,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
     marginTop: 2,
   },
   itemChevron: {
     fontSize: 18,
-    color: '#D1D5DB',
+    color: 'rgba(255,255,255,0.30)',
     fontWeight: '600',
   },
 });
@@ -312,7 +317,7 @@ const styles = StyleSheet.create({
 const modalStyles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0F0F0F',
   },
   modalHeader: {
     paddingHorizontal: 24,
@@ -324,7 +329,7 @@ const modalStyles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    color: '#111827',
+    color: '#FFFFFF',
     fontWeight: '500',
   },
   content: {
@@ -335,29 +340,29 @@ const modalStyles = StyleSheet.create({
   modalTitle: {
     fontSize: 32,
     fontWeight: '400',
-    color: '#111827',
+    color: '#FFFFFF',
     letterSpacing: -0.5,
     marginBottom: 8,
   },
   modalSubtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
     fontWeight: '400',
     marginBottom: 32,
   },
   displayValueContainer: {
     alignItems: 'center',
     marginBottom: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#242424',
     paddingVertical: 30,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   displayValue: {
     fontSize: 60,
     fontWeight: '200',
-    color: '#111827',
+    color: '#FFFFFF',
     letterSpacing: -1,
   },
   slider: {
@@ -372,23 +377,25 @@ const modalStyles = StyleSheet.create({
   },
   minText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
   },
   maxText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
   },
   infoText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
     lineHeight: 20,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#242424',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
     borderRadius: 12,
     padding: 16,
     marginBottom: 32,
   },
   saveButton: {
-    backgroundColor: '#111827',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     paddingVertical: 18,
     alignItems: 'center',
@@ -396,7 +403,7 @@ const modalStyles = StyleSheet.create({
   saveButtonText: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#0F0F0F',
     letterSpacing: -0.2,
   },
 });

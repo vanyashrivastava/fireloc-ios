@@ -1,7 +1,8 @@
+// dark-mode-system applied
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Dimensions, Modal, TextInput, Alert, Image, ActionSheetIOS, Platform,
+  Dimensions, Modal, TextInput, Alert, Image, ActionSheetIOS, Platform, StatusBar,
 } from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_DEFAULT } from 'react-native-maps';
 import * as ImagePicker from 'expo-image-picker';
@@ -228,6 +229,7 @@ export default function MapScreen() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0F0F0F" />
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* Title */}
@@ -411,7 +413,7 @@ export default function MapScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="123 Main Street, Los Angeles, CA"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="rgba(255,255,255,0.35)"
                 value={location}
                 onChangeText={setLocation}
               />
@@ -519,7 +521,7 @@ export default function MapScreen() {
               <TextInput
                 style={styles.textArea}
                 placeholder="e.g., Large smoke plume visible from highway, flames approximately 20 feet high..."
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="rgba(255,255,255,0.35)"
                 value={description}
                 onChangeText={setDescription}
                 multiline
@@ -545,7 +547,7 @@ export default function MapScreen() {
               onPress={handleSubmit}
               disabled={isSubmitting}
             >
-              <Text style={styles.submitButtonText}>
+              <Text style={[styles.submitButtonText, isSubmitting && styles.submitButtonTextDisabled]}>
                 {isSubmitting ? 'Submitting…' : 'Submit Report'}
               </Text>
             </TouchableOpacity>
@@ -560,37 +562,37 @@ export default function MapScreen() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: '#0F0F0F' },
 
   titleContainer: { paddingHorizontal: 24, paddingTop: 60, paddingBottom: 12 },
-  title: { fontSize: 42, fontWeight: '300', color: '#111827', letterSpacing: -0.5, marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#6B7280', fontWeight: '400' },
+  title: { fontSize: 42, fontWeight: '300', color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 4 },
+  subtitle: { fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: '400' },
 
   statsContainer: { flexDirection: 'row', paddingHorizontal: 24, paddingVertical: 20, gap: 12 },
-  statCard: { flex: 1, backgroundColor: '#F9FAFB', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: '#F3F4F6' },
-  statNumber: { fontSize: 32, fontWeight: '300', color: '#111827', marginBottom: 4 },
-  statLabel: { fontSize: 13, color: '#6B7280', fontWeight: '500' },
+  statCard: { flex: 1, backgroundColor: '#1A1A1A', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
+  statNumber: { fontSize: 32, fontWeight: '300', color: '#FFFFFF', marginBottom: 4 },
+  statLabel: { fontSize: 13, color: 'rgba(255,255,255,0.55)', fontWeight: '500' },
 
   mapWidget: {
-    marginHorizontal: 24, marginTop: 8, backgroundColor: '#FFFFFF',
-    borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB', overflow: 'hidden',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 3,
+    marginHorizontal: 24, marginTop: 8, backgroundColor: '#1A1A1A',
+    borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.5, shadowRadius: 8, elevation: 3,
   },
   mapHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+    paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
   },
-  mapTitle: { fontSize: 16, fontWeight: '500', color: '#111827' },
-  locationButton: { width: 36, height: 36, backgroundColor: '#F3F4F6', borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  locationDot: { width: 10, height: 10, backgroundColor: '#3B82F6', borderRadius: 5, borderWidth: 2, borderColor: '#BFDBFE' },
-  loadingContainer: { height: 300, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F9FAFB' },
-  loadingText: { color: '#9CA3AF', fontSize: 14 },
+  mapTitle: { fontSize: 16, fontWeight: '500', color: '#FFFFFF' },
+  locationButton: { width: 36, height: 36, backgroundColor: '#242424', borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
+  locationDot: { width: 10, height: 10, backgroundColor: '#FFFFFF', borderRadius: 5, borderWidth: 2, borderColor: 'rgba(255,255,255,0.35)' },
+  loadingContainer: { height: 300, alignItems: 'center', justifyContent: 'center', backgroundColor: '#1A1A1A' },
+  loadingText: { color: 'rgba(255,255,255,0.30)', fontSize: 14 },
   map: { height: 300, width: '100%' },
 
   markerOuter: {
     width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: '#FFFFFF',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.5, shadowRadius: 4, elevation: 4,
   },
   markerIcon: { fontSize: 18 },
   evacuationBadge: {
@@ -600,96 +602,97 @@ const styles = StyleSheet.create({
   },
   evacuationIcon: { fontSize: 8, color: '#FFF' },
 
-  calloutContainer: { width: 200, padding: 10 },
-  calloutName: { fontSize: 14, fontWeight: '600', color: '#111827', marginBottom: 3 },
-  calloutDetail: { fontSize: 12, color: '#6B7280' },
-  calloutEvac: { fontSize: 11, color: '#DC2626', fontWeight: '600', marginTop: 4 },
+  calloutContainer: { width: 200, padding: 10, backgroundColor: '#242424', borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
+  calloutName: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', marginBottom: 3 },
+  calloutDetail: { fontSize: 12, color: 'rgba(255,255,255,0.55)' },
+  calloutEvac: { fontSize: 11, color: '#EF4444', fontWeight: '600', marginTop: 4 },
 
-  mapFooter: { paddingVertical: 12, paddingHorizontal: 20, backgroundColor: '#F9FAFB', borderTopWidth: 1, borderTopColor: '#F3F4F6' },
-  mapFooterText: { fontSize: 12, color: '#9CA3AF', textAlign: 'center' },
+  mapFooter: { paddingVertical: 12, paddingHorizontal: 20, backgroundColor: '#1A1A1A', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' },
+  mapFooterText: { fontSize: 12, color: 'rgba(255,255,255,0.30)', textAlign: 'center' },
 
-  reportButton: { marginHorizontal: 24, marginTop: 24, backgroundColor: '#111827', borderRadius: 16, paddingVertical: 20, paddingHorizontal: 24, alignItems: 'center' },
+  reportButton: { marginHorizontal: 24, marginTop: 24, backgroundColor: '#1A1A1A', borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)', borderRadius: 16, paddingVertical: 20, paddingHorizontal: 24, alignItems: 'center' },
   reportButtonText: { fontSize: 18, fontWeight: '500', color: '#FFFFFF', marginBottom: 4, letterSpacing: -0.2 },
-  reportButtonSubtext: { fontSize: 13, color: '#9CA3AF', fontWeight: '400' },
+  reportButtonSubtext: { fontSize: 13, color: 'rgba(255,255,255,0.55)', fontWeight: '400' },
 
   filterSection: { paddingHorizontal: 24, paddingTop: 32 },
-  filterTitle: { fontSize: 14, fontWeight: '500', color: '#6B7280', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
+  filterTitle: { fontSize: 14, fontWeight: '500', color: 'rgba(255,255,255,0.55)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
   filterContainer: { flexDirection: 'row', gap: 8 },
-  filterButton: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F3F4F6' },
-  filterButtonActive: { backgroundColor: '#111827' },
-  filterButtonText: { fontSize: 14, fontWeight: '500', color: '#6B7280' },
-  filterButtonTextActive: { color: '#FFFFFF' },
+  filterButton: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#1A1A1A', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
+  filterButtonActive: { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' },
+  filterButtonText: { fontSize: 14, fontWeight: '500', color: 'rgba(255,255,255,0.55)' },
+  filterButtonTextActive: { color: '#0F0F0F' },
 
   incidentsSection: { paddingHorizontal: 24, paddingTop: 32 },
-  incidentsTitle: { fontSize: 22, fontWeight: '400', color: '#111827', marginBottom: 16, letterSpacing: -0.3 },
-  incidentCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#F3F4F6' },
-  incidentCardSelected: { borderColor: '#3B82F6', backgroundColor: '#EFF6FF' },
+  incidentsTitle: { fontSize: 22, fontWeight: '400', color: '#FFFFFF', marginBottom: 16, letterSpacing: -0.3 },
+  incidentCard: { backgroundColor: '#1A1A1A', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
+  incidentCardSelected: { borderColor: 'rgba(255,255,255,0.18)', backgroundColor: '#242424' },
   incidentHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
   incidentInfo: { flex: 1 },
-  incidentTime: { fontSize: 10, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
-  incidentName: { fontSize: 17, fontWeight: '500', color: '#111827', marginBottom: 3 },
-  incidentLocation: { fontSize: 13, color: '#6B7280' },
+  incidentTime: { fontSize: 10, color: 'rgba(255,255,255,0.30)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
+  incidentName: { fontSize: 17, fontWeight: '500', color: '#FFFFFF', marginBottom: 3 },
+  incidentLocation: { fontSize: 13, color: 'rgba(255,255,255,0.55)' },
   incidentIcon: { width: 52, height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginLeft: 12 },
   incidentIconText: { fontSize: 26 },
   incidentStats: { flexDirection: 'row', gap: 16, marginTop: 8 },
-  incidentStat: { fontSize: 13, color: '#6B7280' },
-  evacuationWarning: { backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FECACA', borderRadius: 10, padding: 8, marginTop: 10 },
-  evacuationWarningText: { color: '#DC2626', fontSize: 12, fontWeight: '600' },
+  incidentStat: { fontSize: 13, color: 'rgba(255,255,255,0.55)' },
+  evacuationWarning: { backgroundColor: 'rgba(239,68,68,0.12)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.25)', borderRadius: 10, padding: 8, marginTop: 10 },
+  evacuationWarningText: { color: '#EF4444', fontSize: 12, fontWeight: '600' },
 
-  modalContainer: { flex: 1, backgroundColor: '#FFFFFF' },
+  modalContainer: { flex: 1, backgroundColor: '#0F0F0F' },
   modalHeader: { paddingHorizontal: 24, paddingTop: 60, paddingBottom: 12 },
   backButton: { alignSelf: 'flex-start' },
-  backButtonText: { fontSize: 16, color: '#111827', fontWeight: '500' },
+  backButtonText: { fontSize: 16, color: '#FFFFFF', fontWeight: '500' },
   modalTitleContainer: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 32 },
-  modalTitle: { fontSize: 42, fontWeight: '300', color: '#111827', letterSpacing: -0.5, marginBottom: 8 },
-  modalSubtitle: { fontSize: 16, color: '#6B7280', fontWeight: '400' },
+  modalTitle: { fontSize: 42, fontWeight: '300', color: '#FFFFFF', letterSpacing: -0.5, marginBottom: 8 },
+  modalSubtitle: { fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: '400' },
 
   section: { paddingHorizontal: 24, marginBottom: 32 },
-  sectionLabel: { fontSize: 14, fontWeight: '600', color: '#111827', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
-  sectionDescription: { fontSize: 14, color: '#6B7280', marginBottom: 16 },
+  sectionLabel: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionDescription: { fontSize: 14, color: 'rgba(255,255,255,0.55)', marginBottom: 16 },
 
-  input: { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: '#111827' },
+  input: { backgroundColor: '#242424', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: '#FFFFFF' },
 
-  mapToggleButton: { backgroundColor: '#F3F4F6', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 12 },
-  mapToggleText: { fontSize: 15, fontWeight: '500', color: '#111827' },
+  mapToggleButton: { backgroundColor: '#1A1A1A', borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 12 },
+  mapToggleText: { fontSize: 15, fontWeight: '500', color: '#FFFFFF' },
   mapContainer: { marginTop: 16 },
-  mapInstruction: { fontSize: 13, color: '#6B7280', textAlign: 'center', marginBottom: 12 },
-  interactiveMap: { height: 280, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#E5E7EB' },
-  coordinatesText: { fontSize: 12, color: '#6B7280', textAlign: 'center', marginTop: 12 },
+  mapInstruction: { fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center', marginBottom: 12 },
+  interactiveMap: { height: 280, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)' },
+  coordinatesText: { fontSize: 12, color: 'rgba(255,255,255,0.30)', textAlign: 'center', marginTop: 12 },
 
   // Three attachment tiles
   attachmentOptions: { flexDirection: 'row', gap: 10 },
   attachmentTile: {
-    flex: 1, backgroundColor: '#F9FAFB', borderWidth: 1.5, borderColor: '#E5E7EB',
+    flex: 1, backgroundColor: '#242424', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.10)',
     borderRadius: 16, paddingVertical: 20, alignItems: 'center', gap: 5,
   },
   attachmentTileIcon: { fontSize: 28 },
-  attachmentTileLabel: { fontSize: 12, fontWeight: '600', color: '#111827', textAlign: 'center' },
-  attachmentTileSub: { fontSize: 11, color: '#9CA3AF', textAlign: 'center' },
+  attachmentTileLabel: { fontSize: 12, fontWeight: '600', color: '#FFFFFF', textAlign: 'center' },
+  attachmentTileSub: { fontSize: 11, color: 'rgba(255,255,255,0.30)', textAlign: 'center' },
 
   // Attachment preview card
-  attachmentPreview: { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 16, overflow: 'hidden' },
+  attachmentPreview: { backgroundColor: '#242424', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', borderRadius: 16, overflow: 'hidden' },
   previewImage: { width: '100%', height: 200 },
   filePreview: { height: 120, alignItems: 'center', justifyContent: 'center', gap: 8 },
   filePreviewIcon: { fontSize: 40 },
-  filePreviewName: { fontSize: 14, color: '#374151', fontWeight: '500', paddingHorizontal: 16 },
-  attachmentActions: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#E5E7EB' },
+  filePreviewName: { fontSize: 14, color: '#FFFFFF', fontWeight: '500', paddingHorizontal: 16 },
+  attachmentActions: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' },
   attachmentActionBtn: { flex: 1, paddingVertical: 14, alignItems: 'center' },
-  attachmentActionBtnDanger: { borderLeftWidth: 1, borderLeftColor: '#E5E7EB' },
-  attachmentActionText: { fontSize: 14, fontWeight: '500', color: '#111827' },
+  attachmentActionBtnDanger: { borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.06)' },
+  attachmentActionText: { fontSize: 14, fontWeight: '500', color: '#FFFFFF' },
   attachmentActionTextDanger: { color: '#EF4444' },
 
-  textArea: { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, color: '#111827', minHeight: 120 },
+  textArea: { backgroundColor: '#242424', borderWidth: 1, borderColor: 'rgba(255,255,255,0.10)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, color: '#FFFFFF', minHeight: 120 },
 
-  noticeContainer: { flexDirection: 'row', backgroundColor: '#FEF3C7', borderWidth: 1, borderColor: '#FDE68A', borderRadius: 12, padding: 16, marginHorizontal: 24, marginBottom: 24, gap: 12 },
+  noticeContainer: { flexDirection: 'row', backgroundColor: 'rgba(239,68,68,0.12)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.25)', borderRadius: 12, padding: 16, marginHorizontal: 24, marginBottom: 24, gap: 12 },
   noticeIcon: { fontSize: 20 },
   noticeContent: { flex: 1 },
-  noticeTitle: { fontSize: 14, fontWeight: '600', color: '#92400E', marginBottom: 4 },
-  noticeText: { fontSize: 13, color: '#78350F', lineHeight: 18 },
+  noticeTitle: { fontSize: 14, fontWeight: '600', color: '#EF4444', marginBottom: 4 },
+  noticeText: { fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 18 },
 
-  submitButton: { marginHorizontal: 24, backgroundColor: '#111827', borderRadius: 14, paddingVertical: 18, alignItems: 'center' },
-  submitButtonDisabled: { backgroundColor: '#6B7280' },
-  submitButtonText: { fontSize: 17, fontWeight: '600', color: '#FFFFFF', letterSpacing: -0.2 },
+  submitButton: { marginHorizontal: 24, backgroundColor: '#FFFFFF', borderRadius: 14, paddingVertical: 18, alignItems: 'center' },
+  submitButtonDisabled: { backgroundColor: 'rgba(255,255,255,0.08)' },
+  submitButtonText: { fontSize: 17, fontWeight: '600', color: '#0F0F0F', letterSpacing: -0.2 },
+  submitButtonTextDisabled: { color: 'rgba(255,255,255,0.30)' },
 });
 
 // npx expo install expo-image-picker expo-document-picker expo-notifications

@@ -1,3 +1,4 @@
+// dark-mode-system applied
 import React from 'react';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
@@ -13,26 +14,29 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const COLORS = {
-  primary: '#FF4D2E',
-  white: '#FFFFFF',
-  gray: '#F5F5F5',
-  darkGray: '#333333',
-  inactive: '#999999',
+  primary: '#FFFFFF',
+  white: '#0F0F0F',
+  gray: '#1A1A1A',
+  darkGray: '#FFFFFF',
+  inactive: 'rgba(255,255,255,0.35)',
 };
 
 const screenOptions = {
   headerStyle: {
-    backgroundColor: COLORS.white,
+    backgroundColor: '#0F0F0F',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.5,
     shadowRadius: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
-  headerTintColor: COLORS.darkGray,
+  headerTintColor: '#FFFFFF',
   headerTitleStyle: {
     fontWeight: '700',
     fontSize: 18,
+    color: '#FFFFFF',
   },
   headerTitleAlign: 'center',
 };
@@ -45,19 +49,19 @@ const tabScreenOptions = ({ route }) => ({
     marginBottom: 4,
   },
   tabBarStyle: {
-    backgroundColor: COLORS.white,
+    backgroundColor: '#0F0F0F',
     borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
+    borderTopColor: 'rgba(255,255,255,0.08)',
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.5,
     shadowRadius: 8,
     paddingBottom: 4,
     paddingTop: 4,
     height: 68,
   },
-  tabBarActiveTintColor: COLORS.primary,
+  tabBarActiveTintColor: '#FFFFFF',
   tabBarInactiveTintColor: COLORS.inactive,
   headerShown: true,
   ...screenOptions,
@@ -70,14 +74,16 @@ const MapStack = createStackNavigator({
     navigationOptions: {
       title: 'Map',
       headerStyle: {
-        backgroundColor: COLORS.white,
+        backgroundColor: '#0F0F0F',
         elevation: 0,
         shadowOpacity: 0,
       },
       headerTitleStyle: {
         fontWeight: '700',
         fontSize: 18,
+        color: '#FFFFFF',
       },
+      headerTintColor: '#FFFFFF',
       headerTitleAlign: 'center',
     },
   },
@@ -154,16 +160,16 @@ const TabNavigator = TabNavigator = Tab.Navigator ? null : createBottomTabNaviga
 }, {
   initialRouteName: 'Map',
   tabBarOptions: {
-    activeTintColor: COLORS.primary,
+    activeTintColor: '#FFFFFF',
     inactiveTintColor: COLORS.inactive,
     style: {
-      backgroundColor: COLORS.white,
+      backgroundColor: '#0F0F0F',
       borderTopWidth: 1,
-      borderTopColor: '#EEEEEE',
+      borderTopColor: 'rgba(255,255,255,0.08)',
       elevation: 8,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: -2 },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.5,
       shadowRadius: 8,
       paddingBottom: 4,
       paddingTop: 4,

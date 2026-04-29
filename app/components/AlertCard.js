@@ -1,15 +1,16 @@
+// dark-mode-system applied
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card } from 'react-native-paper';
 
 const COLORS = {
-  primary: '#FF4D2E',
-  white: '#FFFFFF',
-  gray: '#F5F5F5',
-  darkGray: '#333333',
-  lightGray: '#EEEEEE',
-  border: '#DDDDDD',
-  unreadBg: '#FFF5F2',
+  primary: '#EF4444',
+  white: '#1A1A1A',
+  gray: '#242424',
+  darkGray: '#FFFFFF',
+  lightGray: 'rgba(255,255,255,0.06)',
+  border: 'rgba(255,255,255,0.10)',
+  unreadBg: '#242424',
 };
 
 export const AlertCard = ({ alert, onPress, onMarkAsRead }) => {
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.5,
     shadowRadius: 4,
   },
   innerCardUnread: {
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 13,
-    color: '#666666',
+    color: 'rgba(255,255,255,0.55)',
     marginBottom: 8,
     lineHeight: 18,
   },
@@ -130,16 +131,18 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: 12,
-    color: '#999999',
+    color: 'rgba(255,255,255,0.30)',
   },
   markReadBtn: {
     paddingVertical: 4,
     paddingHorizontal: 10,
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#1A1A1A',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
     borderRadius: 6,
   },
   markReadText: {
-    color: COLORS.white,
+    color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '600',
   },

@@ -1,14 +1,15 @@
+// dark-mode-system applied
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card } from 'react-native-paper';
 
 const COLORS = {
-  primary: '#FF4D2E',
-  white: '#FFFFFF',
-  gray: '#F5F5F5',
-  darkGray: '#333333',
-  lightGray: '#EEEEEE',
-  border: '#DDDDDD',
+  primary: '#FFFFFF',
+  white: '#1A1A1A',
+  gray: '#242424',
+  darkGray: '#FFFFFF',
+  lightGray: 'rgba(255,255,255,0.06)',
+  border: 'rgba(255,255,255,0.10)',
 };
 
 export const FireMarker = ({ fire, onPress }) => {
@@ -92,10 +93,12 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     borderRadius: 12,
     backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.5,
     shadowRadius: 8,
   },
   cardContent: {
@@ -123,7 +126,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 14,
-    color: '#666666',
+    color: 'rgba(255,255,255,0.55)',
     flex: 1,
     textAlign: 'right',
   },
@@ -131,12 +134,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
-    color: COLORS.white,
+    color: '#0F0F0F',
     fontSize: 14,
     fontWeight: '600',
   },

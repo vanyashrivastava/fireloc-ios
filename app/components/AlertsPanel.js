@@ -1,3 +1,4 @@
+// dark-mode-system applied
 import React, { useRef, useMemo } from 'react';
 import {
   View,
@@ -12,12 +13,12 @@ import { Card } from 'react-native-paper';
 import AlertCard from './AlertCard';
 
 const COLORS = {
-  primary: '#FF4D2E',
-  white: '#FFFFFF',
-  gray: '#F5F5F5',
-  darkGray: '#333333',
-  lightGray: '#EEEEEE',
-  border: '#DDDDDD',
+  primary: '#EF4444',
+  white: '#0F0F0F',
+  gray: '#1A1A1A',
+  darkGray: '#FFFFFF',
+  lightGray: 'rgba(255,255,255,0.06)',
+  border: 'rgba(255,255,255,0.10)',
 };
 
 export const AlertsPanel = ({
@@ -112,10 +113,12 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 10,
     backgroundColor: COLORS.gray,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.5,
     shadowRadius: 2,
   },
   statContent: {
@@ -130,7 +133,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#666666',
+    color: 'rgba(255,255,255,0.55)',
     marginTop: 4,
     fontWeight: '500',
   },
@@ -145,6 +148,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: COLORS.gray,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
   },
   alertsList: {
     flex: 1,
@@ -163,7 +168,7 @@ const styles = StyleSheet.create({
   },
   emptySubtext: {
     fontSize: 13,
-    color: '#999999',
+    color: 'rgba(255,255,255,0.30)',
     marginTop: 8,
   },
   listBottom: {

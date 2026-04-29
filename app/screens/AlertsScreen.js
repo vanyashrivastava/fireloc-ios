@@ -1,3 +1,4 @@
+// dark-mode-system applied
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -222,7 +223,7 @@ export default function AlertsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F0F0F" />
 
       {/* Title */}
       <View style={styles.titleContainer}>
@@ -383,7 +384,7 @@ export default function AlertsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0F0F0F',
   },
   titleContainer: {
     paddingHorizontal: 20,
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 42,
     fontWeight: '300',
-    color: '#111827',
+    color: '#FFFFFF',
     letterSpacing: -0.5,
   },
   filterContainer: {
@@ -406,35 +407,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 22,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#1A1A1A',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   filterButtonActive: {
-    backgroundColor: '#111827',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#FFFFFF',
   },
   filterButtonText: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
   },
   filterButtonTextActive: {
-    color: '#FFFFFF',
+    color: '#0F0F0F',
   },
   alertsList: {
     flex: 1,
     paddingHorizontal: 20,
   },
   alertCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1A1A1A',
     borderRadius: 20,
     padding: 20,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.5,
     shadowRadius: 3,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   alertContent: {
     flexDirection: 'row',
@@ -448,7 +452,7 @@ const styles = StyleSheet.create({
   },
   alertTime: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: 'rgba(255,255,255,0.30)',
     fontWeight: '500',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -457,13 +461,13 @@ const styles = StyleSheet.create({
   alertName: {
     fontSize: 24,
     fontWeight: '400',
-    color: '#111827',
+    color: '#FFFFFF',
     marginBottom: 6,
     letterSpacing: -0.3,
   },
   alertAddress: {
     fontSize: 15,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
     lineHeight: 20,
   },
   alertIconContainer: {
@@ -482,12 +486,12 @@ const styles = StyleSheet.create({
   },
   menuDotsText: {
     fontSize: 24,
-    color: '#D1D5DB',
+    color: 'rgba(255,255,255,0.30)',
     letterSpacing: 2,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0F0F0F',
   },
   modalHeader: {
     paddingHorizontal: 20,
@@ -499,19 +503,23 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#242424',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   closeButtonText: {
     fontSize: 20,
-    color: '#6B7280',
+    color: '#FFFFFF',
   },
   imagePlaceholder: {
     height: 250,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#1A1A1A',
     marginHorizontal: 20,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -522,7 +530,7 @@ const styles = StyleSheet.create({
   },
   imagePlaceholderText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: 'rgba(255,255,255,0.30)',
   },
   modalContent: {
     paddingHorizontal: 20,
@@ -534,25 +542,25 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 32,
     fontWeight: '400',
-    color: '#111827',
+    color: '#FFFFFF',
     marginBottom: 8,
     letterSpacing: -0.5,
   },
   modalAddress: {
     fontSize: 16,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
     marginBottom: 4,
   },
   modalTime: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: 'rgba(255,255,255,0.30)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   distanceBadge: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(239,68,68,0.12)',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: 'rgba(239,68,68,0.25)',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
@@ -562,56 +570,60 @@ const styles = StyleSheet.create({
   distanceText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#DC2626',
+    color: '#EF4444',
   },
   infoSection: {
     marginBottom: 24,
   },
   infoLabel: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: 'rgba(255,255,255,0.30)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 6,
   },
   infoValue: {
     fontSize: 16,
-    color: '#111827',
+    color: '#FFFFFF',
     fontWeight: '400',
   },
   descriptionSection: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#242424',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
     padding: 20,
     borderRadius: 16,
     marginBottom: 32,
   },
   descriptionText: {
     fontSize: 15,
-    color: '#374151',
+    color: 'rgba(255,255,255,0.65)',
     lineHeight: 22,
   },
   actionButtons: {
     gap: 12,
   },
   primaryButton: {
-    backgroundColor: '#111827',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: '#0F0F0F',
     fontSize: 16,
     fontWeight: '600',
   },
   secondaryButton: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#1A1A1A',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
   },
   secondaryButtonText: {
-    color: '#111827',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -622,7 +634,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#9CA3AF',
+    color: 'rgba(255,255,255,0.30)',
   },
   emptyState: {
     paddingVertical: 60,
@@ -632,12 +644,12 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '500',
-    color: '#111827',
+    color: '#FFFFFF',
     marginBottom: 8,
   },
   emptyStateText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.55)',
     textAlign: 'center',
     paddingHorizontal: 20,
   },
