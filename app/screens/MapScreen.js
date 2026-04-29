@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Modal, TextInput, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Modal, TextInput, Alert } from 'react-native';
+import MapView, { Marker, Callout, PROVIDER_DEFAULT } from 'react-native-maps';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
+
+// Default region centered on Los Angeles
+const LA_REGION = {
+  latitude: 34.0522,
+  longitude: -118.2437,
+  latitudeDelta: 0.8,
+  longitudeDelta: 0.8,
+};
 
 export default function MapScreen() {
   const [fires, setFires] = useState([]);
@@ -13,9 +22,11 @@ export default function MapScreen() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
-  const [markerPosition, setMarkerPosition] = useState({ x: 150, y: 120 });
+  const [droppedPin, setDroppedPin] = useState(null);
   const [showMap, setShowMap] = useState(false);
   const [photoUploaded, setPhotoUploaded] = useState(false);
+  const mapRef = useRef(null);
+  const reportMapRef = useRef(null);
 
   useEffect(() => {
     const fetchFireData = async () => {
@@ -55,9 +66,17 @@ export default function MapScreen() {
 
   const activeCount = fires.filter(f => f.status === 'Active').length;
 
-  const handleMapPress = (event) => {
-    const { locationX, locationY } = event.nativeEvent;
-    setMarkerPosition({ x: locationX, y: locationY });
+  // Fly the main map to a selected fire's coordinates
+  const handleFireCardPress = (fire) => {
+    if (mapRef.current && fire.latitude && fire.longitude) {
+      mapRef.current.animateToRegion({
+        latitude: fire.latitude,
+        longitude: fire.longitude,
+        latitudeDelta: 0.15,
+        longitudeDelta: 0.15,
+      }, 600);
+    }
+    setSelectedFire(fire.id === selectedFire ? null : fire.id);
   };
 
   const handlePhotoUpload = () => {
@@ -66,7 +85,7 @@ export default function MapScreen() {
   };
 
   const handleSubmit = () => {
-    if (!location && !showMap) {
+    if (!location && !droppedPin) {
       Alert.alert('Location Required', 'Please provide a location or drop a pin on the map.');
       return;
     }
@@ -74,13 +93,14 @@ export default function MapScreen() {
     Alert.alert(
       'Report Submitted',
       'Thank you for your report. Emergency services have been notified.',
-      [{ 
-        text: 'OK', 
+      [{
+        text: 'OK',
         onPress: () => {
           setShowReportModal(false);
           setLocation('');
           setDescription('');
           setShowMap(false);
+          setDroppedPin(null);
           setPhotoUploaded(false);
         }
       }]
@@ -104,82 +124,80 @@ export default function MapScreen() {
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>
-              {fires.reduce((sum, f) => sum + f.acres, 0).toLocaleString()}
+              {fires.reduce((sum, f) => sum + (f.acres || 0), 0).toLocaleString()}
             </Text>
             <Text style={styles.statLabel}>Acres Burned</Text>
           </View>
         </View>
 
-        {/* Map Widget */}
+        {/* Apple Maps Widget */}
         <View style={styles.mapWidget}>
           <View style={styles.mapHeader}>
             <Text style={styles.mapTitle}>Los Angeles Area</Text>
-            <TouchableOpacity style={styles.locationButton}>
+            <TouchableOpacity
+              style={styles.locationButton}
+              onPress={() => mapRef.current?.animateToRegion(LA_REGION, 600)}
+            >
               <View style={styles.locationDot} />
             </TouchableOpacity>
           </View>
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading...</Text>
+              <Text style={styles.loadingText}>Loading map...</Text>
             </View>
           ) : (
-            <View style={styles.map}>
-              {/* Placeholder Map */}
-              <View style={styles.mapPlaceholder}>
-                <Text style={styles.mapPlaceholderText}>📍</Text>
-              </View>
-
-              {/* Fire Markers */}
+            <MapView
+              ref={mapRef}
+              style={styles.map}
+              provider={PROVIDER_DEFAULT} // Uses Apple Maps on iOS
+              initialRegion={LA_REGION}
+              showsUserLocation
+              showsCompass
+              showsScale
+            >
               {filteredFires.map((fire) => (
-                <TouchableOpacity
-                  key={fire.id}
-                  style={[
-                    styles.marker,
-                    { 
-                      top: fire.top, 
-                      left: fire.left,
-                      backgroundColor: getSeverityColor(fire.severity),
-                    }
-                  ]}
-                  onPress={() => setSelectedFire(fire.id === selectedFire ? null : fire.id)}
-                >
-                  <Text style={styles.markerIcon}>🔥</Text>
-                  {fire.evacuations && (
-                    <View style={styles.evacuationBadge}>
-                      <Text style={styles.evacuationIcon}>⚠</Text>
+                fire.latitude && fire.longitude ? (
+                  <Marker
+                    key={fire.id}
+                    coordinate={{ latitude: fire.latitude, longitude: fire.longitude }}
+                    onPress={() => setSelectedFire(fire.id === selectedFire ? null : fire.id)}
+                  >
+                    {/* Custom fire marker */}
+                    <View style={[styles.markerOuter, { backgroundColor: getSeverityColor(fire.severity) }]}>
+                      <Text style={styles.markerIcon}>🔥</Text>
+                      {fire.evacuations && (
+                        <View style={styles.evacuationBadge}>
+                          <Text style={styles.evacuationIcon}>⚠</Text>
+                        </View>
+                      )}
                     </View>
-                  )}
-                </TouchableOpacity>
-              ))}
 
-              {/* Selected Fire Info */}
-              {selectedFire && (
-                <View style={styles.mapPopup}>
-                  {(() => {
-                    const fire = fires.find(f => f.id === selectedFire);
-                    return (
-                      <>
-                        <Text style={styles.popupName}>{fire.name}</Text>
-                        <Text style={styles.popupDetail}>
-                          {fire.acres.toLocaleString()} acres • {fire.containment}% contained
+                    {/* Native callout bubble shown on tap */}
+                    <Callout tooltip={false}>
+                      <View style={styles.calloutContainer}>
+                        <Text style={styles.calloutName}>{fire.name}</Text>
+                        <Text style={styles.calloutDetail}>
+                          {(fire.acres || 0).toLocaleString()} acres • {fire.containment ?? 0}% contained
                         </Text>
-                      </>
-                    );
-                  })()}
-                </View>
-              )}
-            </View>
+                        {fire.evacuations && (
+                          <Text style={styles.calloutEvac}>⚠ Evacuation Orders</Text>
+                        )}
+                      </View>
+                    </Callout>
+                  </Marker>
+                ) : null
+              ))}
+            </MapView>
           )}
 
-          {/* Map Footer */}
           <View style={styles.mapFooter}>
             <Text style={styles.mapFooterText}>Tap markers for details</Text>
           </View>
         </View>
 
         {/* Report Button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.reportButton}
           onPress={() => setShowReportModal(true)}
         >
@@ -194,10 +212,7 @@ export default function MapScreen() {
             {['all', 'active', 'evacuations'].map((filterType) => (
               <TouchableOpacity
                 key={filterType}
-                style={[
-                  styles.filterButton,
-                  filter === filterType && styles.filterButtonActive
-                ]}
+                style={[styles.filterButton, filter === filterType && styles.filterButtonActive]}
                 onPress={() => setFilter(filterType)}
               >
                 <Text style={[
@@ -214,9 +229,17 @@ export default function MapScreen() {
         {/* Recent Incidents List */}
         <View style={styles.incidentsSection}>
           <Text style={styles.incidentsTitle}>Recent Incidents</Text>
-          
+
           {filteredFires.map((fire) => (
-            <View key={fire.id} style={styles.incidentCard}>
+            <TouchableOpacity
+              key={fire.id}
+              style={[
+                styles.incidentCard,
+                selectedFire === fire.id && styles.incidentCardSelected,
+              ]}
+              onPress={() => handleFireCardPress(fire)}
+              activeOpacity={0.8}
+            >
               <View style={styles.incidentHeader}>
                 <View style={styles.incidentInfo}>
                   <Text style={styles.incidentTime}>{fire.time}</Text>
@@ -229,8 +252,8 @@ export default function MapScreen() {
               </View>
 
               <View style={styles.incidentStats}>
-                <Text style={styles.incidentStat}>🔥 {fire.acres.toLocaleString()} acres</Text>
-                <Text style={styles.incidentStat}>💧 {fire.containment}% contained</Text>
+                <Text style={styles.incidentStat}>🔥 {(fire.acres || 0).toLocaleString()} acres</Text>
+                <Text style={styles.incidentStat}>💧 {fire.containment ?? 0}% contained</Text>
               </View>
 
               {fire.evacuations && (
@@ -238,14 +261,14 @@ export default function MapScreen() {
                   <Text style={styles.evacuationWarningText}>⚠ Evacuation Orders</Text>
                 </View>
               )}
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
 
-      {/* Report Modal */}
+      {/* ── Report Modal ── */}
       <Modal
         visible={showReportModal}
         animationType="slide"
@@ -254,17 +277,12 @@ export default function MapScreen() {
       >
         <View style={styles.modalContainer}>
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <TouchableOpacity 
-                style={styles.backButton}
-                onPress={() => setShowReportModal(false)}
-              >
+              <TouchableOpacity style={styles.backButton} onPress={() => setShowReportModal(false)}>
                 <Text style={styles.backButtonText}>✕ Close</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Title */}
             <View style={styles.modalTitleContainer}>
               <Text style={styles.modalTitle}>Report a Fire</Text>
               <Text style={styles.modalSubtitle}>Help us respond quickly to emergencies</Text>
@@ -285,7 +303,7 @@ export default function MapScreen() {
                 onChangeText={setLocation}
               />
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.mapToggleButton}
                 onPress={() => setShowMap(!showMap)}
               >
@@ -297,36 +315,31 @@ export default function MapScreen() {
               {showMap && (
                 <View style={styles.mapContainer}>
                   <Text style={styles.mapInstruction}>
-                    Tap anywhere to drop a pin
+                    Long-press anywhere to drop a pin
                   </Text>
-                  <TouchableOpacity
-                    style={styles.interactiveMap}
-                    activeOpacity={1}
-                    onPress={handleMapPress}
-                  >
-                    <View style={styles.mapBackground}>
-                      <Text style={styles.mapBackgroundText}>📍</Text>
-                      <Text style={styles.mapBackgroundLabel}>Los Angeles Area</Text>
-                    </View>
 
-                    <View 
-                      style={[
-                        styles.droppedMarker,
-                        { 
-                          left: markerPosition.x - 20,
-                          top: markerPosition.y - 40,
-                        }
-                      ]}
-                    >
-                      <Text style={styles.markerIconLarge}>📍</Text>
-                      <View style={styles.markerPulse} />
-                    </View>
-                  </TouchableOpacity>
-                  
-                  <Text style={styles.coordinatesText}>
-                    Coordinates: {(34.0522 + (markerPosition.y - 120) * 0.001).toFixed(4)}°N, 
-                    {(118.2437 - (markerPosition.x - 150) * 0.001).toFixed(4)}°W
-                  </Text>
+                  <MapView
+                    ref={reportMapRef}
+                    style={styles.interactiveMap}
+                    provider={PROVIDER_DEFAULT}
+                    initialRegion={LA_REGION}
+                    showsUserLocation
+                    onLongPress={(e) => setDroppedPin(e.nativeEvent.coordinate)}
+                  >
+                    {droppedPin && (
+                      <Marker
+                        coordinate={droppedPin}
+                        pinColor="#EF4444"
+                        title="Reported Location"
+                      />
+                    )}
+                  </MapView>
+
+                  {droppedPin && (
+                    <Text style={styles.coordinatesText}>
+                      {droppedPin.latitude.toFixed(4)}°N, {Math.abs(droppedPin.longitude).toFixed(4)}°W
+                    </Text>
+                  )}
                 </View>
               )}
             </View>
@@ -344,18 +357,12 @@ export default function MapScreen() {
                     <Text style={styles.photoPlaceholderIcon}>📷</Text>
                     <Text style={styles.photoPlaceholderText}>Photo Added</Text>
                   </View>
-                  <TouchableOpacity 
-                    style={styles.changePhotoButton}
-                    onPress={handlePhotoUpload}
-                  >
+                  <TouchableOpacity style={styles.changePhotoButton} onPress={handlePhotoUpload}>
                     <Text style={styles.changePhotoText}>Change Photo</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
-                <TouchableOpacity 
-                  style={styles.uploadButton}
-                  onPress={handlePhotoUpload}
-                >
+                <TouchableOpacity style={styles.uploadButton} onPress={handlePhotoUpload}>
                   <Text style={styles.uploadIcon}>📷</Text>
                   <Text style={styles.uploadButtonText}>Upload Photo</Text>
                 </TouchableOpacity>
@@ -365,9 +372,7 @@ export default function MapScreen() {
             {/* Description Section */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Additional Details (Optional)</Text>
-              <Text style={styles.sectionDescription}>
-                Describe what you're seeing
-              </Text>
+              <Text style={styles.sectionDescription}>Describe what you're seeing</Text>
 
               <TextInput
                 style={styles.textArea}
@@ -381,7 +386,7 @@ export default function MapScreen() {
               />
             </View>
 
-            {/* Important Notice */}
+            {/* Notice */}
             <View style={styles.noticeContainer}>
               <Text style={styles.noticeIcon}>ℹ️</Text>
               <View style={styles.noticeContent}>
@@ -392,11 +397,7 @@ export default function MapScreen() {
               </View>
             </View>
 
-            {/* Submit Button */}
-            <TouchableOpacity 
-              style={styles.submitButton}
-              onPress={handleSubmit}
-            >
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
               <Text style={styles.submitButtonText}>Submit Report</Text>
             </TouchableOpacity>
 
@@ -509,23 +510,13 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 14,
   },
+  // The real Apple Maps view
   map: {
     height: 300,
-    backgroundColor: '#F3F4F6',
-    position: 'relative',
+    width: '100%',
   },
-  mapPlaceholder: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -20 }, { translateY: -20 }],
-  },
-  mapPlaceholderText: {
-    fontSize: 40,
-    opacity: 0.3,
-  },
-  marker: {
-    position: 'absolute',
+  // Custom marker bubble
+  markerOuter: {
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -557,30 +548,28 @@ const styles = StyleSheet.create({
   },
   evacuationIcon: {
     fontSize: 8,
+    color: '#FFF',
   },
-  mapPopup: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  // Native callout
+  calloutContainer: {
+    width: 200,
+    padding: 10,
   },
-  popupName: {
+  calloutName: {
     fontSize: 14,
     fontWeight: '600',
     color: '#111827',
-    marginBottom: 2,
+    marginBottom: 3,
   },
-  popupDetail: {
+  calloutDetail: {
     fontSize: 12,
     color: '#6B7280',
+  },
+  calloutEvac: {
+    fontSize: 11,
+    color: '#DC2626',
+    fontWeight: '600',
+    marginTop: 4,
   },
   mapFooter: {
     paddingVertical: 12,
@@ -667,6 +656,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F3F4F6',
   },
+  incidentCardSelected: {
+    borderColor: '#3B82F6',
+    backgroundColor: '#EFF6FF',
+  },
   incidentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -725,6 +718,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+  // Modal
   modalContainer: {
     flex: 1,
     backgroundColor: '#FFFFFF',
@@ -807,47 +801,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 12,
   },
+  // Real Apple Maps in the report modal
   interactiveMap: {
     height: 280,
-    backgroundColor: '#F3F4F6',
     borderRadius: 16,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  mapBackground: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -40 }, { translateY: -30 }],
-    alignItems: 'center',
-    opacity: 0.3,
-  },
-  mapBackgroundText: {
-    fontSize: 32,
-    marginBottom: 4,
-  },
-  mapBackgroundLabel: {
-    fontSize: 12,
-    color: '#9CA3AF',
-  },
-  droppedMarker: {
-    position: 'absolute',
-    alignItems: 'center',
-  },
-  markerIconLarge: {
-    fontSize: 40,
-    zIndex: 2,
-  },
-  markerPulse: {
-    position: 'absolute',
-    top: 10,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#EF4444',
-    opacity: 0.3,
   },
   coordinatesText: {
     fontSize: 12,
